@@ -357,12 +357,28 @@
     transition: all 0.2s;
   }
 
-  .notes-btn:hover {
+  .notes-btn:hover, .question-btn:hover {
     border-color: var(--accent);
     color: var(--accent);
   }
 
-  .notes-area {
+  .question-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .question-btn.has-content {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .notes-area, .question-area {
     display: none;
     width: 100%;
     margin-top: 8px;
@@ -375,10 +391,13 @@
     font-size: 13px;
     font-family: inherit;
     resize: vertical;
-    min-height: 220px;
+    overflow: hidden;
   }
 
-  .notes-area.visible { display: block; }
+  .notes-area { min-height: 80px; }
+  .question-area { min-height: 80px; }
+
+  .notes-area.visible, .question-area.visible { display: block; }
 
   .reset-bar {
     text-align: center;
@@ -452,15 +471,15 @@
 const DATA = [
   {
     name: "Arrays & Hashing", week: 1, problems: [
-      { name: "Contains Duplicate", d: "easy" },
-      { name: "Valid Anagram", d: "easy" },
-      { name: "Two Sum", d: "easy" },
-      { name: "Group Anagrams", d: "medium" },
-      { name: "Top K Frequent Elements", d: "medium" },
-      { name: "Encode and Decode Strings", d: "medium" },
-      { name: "Product of Array Except Self", d: "medium" },
-      { name: "Valid Sudoku", d: "medium" },
-      { name: "Longest Consecutive Sequence", d: "medium" }
+      { name: "Contains Duplicate", d: "easy", q: "Given an integer array nums, return true if any value appears more than once in the array, otherwise return false.\n\nExample 1:\nInput: nums = [1, 2, 3, 3]\nOutput: true\n\nExample 2:\nInput: nums = [1, 2, 3, 4]\nOutput: false" , n: "#Brute Force:\n1. Use two nested loops — outer loop picks each element, inner loop compares it with every subsequent element\n2. If any pair matches (nums[i] == nums[j]), set resp = True and break\n3. Return resp\nTC -> O(n^2), SC -> O(1)\n\n#Better Approach:\n1. Initialize an empty hashmap (dict) to store element counts\n2. Loop through array, for each element increment its count in hashmap\n3. If count of any element exceeds 1, return True immediately (break early)\nTC -> O(n), SC -> O(n)\n\n#Optimal Approach:\n1. Initialize an empty hash set to track seen elements\n2. Loop through the array, for each element check if it already exists in the set\n3. If it exists, set resp = True and break (duplicate found)\n4. If not, add it to the set and continue\nTC -> O(n), SC -> O(n)\n\n#KEY INSIGHT:\n- A hash set gives O(1) lookup for existence checks — you only need to know if you've seen an element before, not how many times, making a set the ideal data structure over a counting hashmap", s: true},
+      { name: "Valid Anagram", d: "easy", q: "Given two strings s and t, return true if the two strings are anagrams of each other, otherwise return false.\n\nAn anagram is a string that contains the exact same characters as another string, but the order of the characters can be different.\n\nExample 1:\nInput: s = \"racecar\", t = \"carrace\"\nOutput: true\n\nExample 2:\nInput: s = \"jar\", t = \"jam\"\nOutput: false\n\nConstraints:\ns and t consist of lowercase English letters." , n: "BRUTE FORCE:\n- Approach:\n- Time: O()\n- Space: O()\n\nBETTER:\n- Approach:\n- Time: O()\n- Space: O()\n\nOPTIMAL:\n- Approach:\n- Time: O()\n- Space: O()\n\nKEY INSIGHT:\n-"},
+      { name: "Two Sum", d: "easy", q: "Given an array of integers nums and an integer target, return the indices i and j such that nums[i] + nums[j] == target and i != j.\n\nYou may assume that every input has exactly one pair of indices i and j that satisfy the condition.\n\nReturn the answer with the smaller index first.\n\nExample 1:\nInput: nums = [3,4,5,6], target = 7\nOutput: [0,1]\n\nExample 2:\nInput: nums = [4,5,6], target = 10\nOutput: [0,2]\n\nExample 3:\nInput: nums = [5,5], target = 10\nOutput: [0,1]\n\nConstraints:\n2 <= nums.length <= 1000\n-10,000,000 <= nums[i] <= 10,000,000\n-10,000,000 <= target <= 10,000,000\nOnly one valid answer exists." , n: "BRUTE FORCE:\n- Approach:\n- Time: O()\n- Space: O()\n\nBETTER:\n- Approach:\n- Time: O()\n- Space: O()\n\nOPTIMAL:\n- Approach:\n- Time: O()\n- Space: O()\n\nKEY INSIGHT:\n-"},
+      { name: "Group Anagrams", d: "medium", q: "Given an array of strings strs, group all anagrams together into sublists. You may return the output in any order.\n\nAn anagram is a string that contains the exact same characters as another string, but the order of the characters can be different.\n\nExample 1:\nInput: strs = [\"act\",\"pots\",\"tops\",\"cat\",\"stop\",\"hat\"]\nOutput: [[\"hat\"],[\"act\", \"cat\"],[\"stop\", \"pots\", \"tops\"]]\n\nExample 2:\nInput: strs = [\"x\"]\nOutput: [[\"x\"]]\n\nExample 3:\nInput: strs = [\"\"]\nOutput: [[\"\"]]\n\nConstraints:\n1 <= strs.length <= 1000\n0 <= strs[i].length <= 100\nstrs[i] is made up of lowercase English letters." , n: "BRUTE FORCE:\n- Approach:\n- Time: O()\n- Space: O()\n\nBETTER:\n- Approach:\n- Time: O()\n- Space: O()\n\nOPTIMAL:\n- Approach:\n- Time: O()\n- Space: O()\n\nKEY INSIGHT:\n-"},
+      { name: "Top K Frequent Elements", d: "medium", q: "Given an integer array nums and an integer k, return the k most frequent elements within the array.\n\nThe test cases are generated such that the answer is always unique.\n\nYou may return the output in any order.\n\nExample 1:\nInput: nums = [1,2,2,3,3,3], k = 2\nOutput: [2,3]\n\nExample 2:\nInput: nums = [7,7], k = 1\nOutput: [7]\n\nConstraints:\n1 <= nums.length <= 10^4\n-1000 <= nums[i] <= 1000\n1 <= k <= number of distinct elements in nums." , n: "BRUTE FORCE:\n- Approach:\n- Time: O()\n- Space: O()\n\nBETTER:\n- Approach:\n- Time: O()\n- Space: O()\n\nOPTIMAL:\n- Approach:\n- Time: O()\n- Space: O()\n\nKEY INSIGHT:\n-"},
+      { name: "Encode and Decode Strings", d: "medium", q: "Design an algorithm to encode a list of strings to a single string. The encoded string is then decoded back to the original list of strings.\n\nImplement encode and decode.\n\nExample 1:\nInput: [\"Hello\",\"World\"]\nOutput: [\"Hello\",\"World\"]\n\nExample 2:\nInput: [\"\"]\nOutput: [\"\"]\n\nConstraints:\n0 <= strs.length < 100\n0 <= strs[i].length < 200\nstrs[i] contains any possible characters out of 256 valid ASCII characters." , n: "BRUTE FORCE:\n- Approach:\n- Time: O()\n- Space: O()\n\nBETTER:\n- Approach:\n- Time: O()\n- Space: O()\n\nOPTIMAL:\n- Approach:\n- Time: O()\n- Space: O()\n\nKEY INSIGHT:\n-"},
+      { name: "Product of Array Except Self", d: "medium", q: "Given an integer array nums, return an array output where output[i] is the product of all the elements of nums except nums[i].\n\nEach product is guaranteed to fit in a 32-bit integer.\n\nFollow-up: Could you solve it in O(n) time without using the division operation?\n\nExample 1:\nInput: nums = [1,2,4,6]\nOutput: [48,24,12,8]\n\nExample 2:\nInput: nums = [-1,0,1,2,3]\nOutput: [0,-6,0,0,0]\n\nConstraints:\n2 <= nums.length <= 1000\n-20 <= nums[i] <= 20" , n: "BRUTE FORCE:\n- Approach:\n- Time: O()\n- Space: O()\n\nBETTER:\n- Approach:\n- Time: O()\n- Space: O()\n\nOPTIMAL:\n- Approach:\n- Time: O()\n- Space: O()\n\nKEY INSIGHT:\n-"},
+      { name: "Valid Sudoku", d: "medium", q: "You are given a 9 x 9 Sudoku board. A Sudoku board is valid if the following rules are followed:\n\n1. Each row must contain the digits 1-9 without duplicates.\n2. Each column must contain the digits 1-9 without duplicates.\n3. Each of the nine 3 x 3 sub-boxes must contain the digits 1-9 without duplicates.\n\nReturn true if the Sudoku board is valid, otherwise return false.\n\nNote: A board does not need to be full or be solvable to be valid.\n\nConstraints:\nboard.length == 9\nboard[i].length == 9\nboard[i][j] is a digit 1-9 or '.'." , n: "BRUTE FORCE:\n- Approach:\n- Time: O()\n- Space: O()\n\nBETTER:\n- Approach:\n- Time: O()\n- Space: O()\n\nOPTIMAL:\n- Approach:\n- Time: O()\n- Space: O()\n\nKEY INSIGHT:\n-"},
+      { name: "Longest Consecutive Sequence", d: "medium", q: "Given an array of integers nums, return the length of the longest consecutive sequence of elements that can be formed.\n\nA consecutive sequence is a sequence of elements in which each element is exactly 1 greater than the previous element. The elements do not have to be consecutive in the original array.\n\nYou must write an algorithm that runs in O(n) time.\n\nExample 1:\nInput: nums = [2,20,4,10,3,4,5]\nOutput: 4\nExplanation: The longest consecutive sequence is [2, 3, 4, 5].\n\nExample 2:\nInput: nums = [0,3,2,5,4,6,1,1]\nOutput: 7\n\nConstraints:\n0 <= nums.length <= 1000\n-10^9 <= nums[i] <= 10^9" , n: "BRUTE FORCE:\n- Approach:\n- Time: O()\n- Space: O()\n\nBETTER:\n- Approach:\n- Time: O()\n- Space: O()\n\nOPTIMAL:\n- Approach:\n- Time: O()\n- Space: O()\n\nKEY INSIGHT:\n-"}
     ]
   },
   {
@@ -742,6 +761,7 @@ function saveState(st) {
 
 function getKey(si, pi) { return si + "-" + pi; }
 function getNoteKey(si, pi) { return "n-" + si + "-" + pi; }
+function getQuestionKey(si, pi) { return "q-" + si + "-" + pi; }
 
 function getCurrentWeek() {
   var start = new Date(2026, 2, 23);
@@ -761,17 +781,26 @@ var currentFilter = "all";
 var openSections = {};
 var openNotes = {};
 
+function autoResize(el) {
+  el.style.height = "auto";
+  el.style.height = el.scrollHeight + "px";
+}
+
 function escapeHtml(text) {
   var div = document.createElement("div");
   div.appendChild(document.createTextNode(text));
   return div.textContent;
 }
 
+var openQuestions = {};
+
 function buildProblemItem(p, si, pi) {
   var key = getKey(si, pi);
   var noteKey = getNoteKey(si, pi);
-  var isChecked = !!state[key];
-  var note = state[noteKey] || "";
+  var questionKey = getQuestionKey(si, pi);
+  var isChecked = key in state ? !!state[key] : !!p.s;
+  var note = state[noteKey] || p.n || "";
+  var question = state[questionKey] || p.q || "";
 
   var wrapper = document.createDocumentFragment();
 
@@ -795,6 +824,10 @@ function buildProblemItem(p, si, pi) {
   diffSpan.className = "problem-difficulty diff-" + p.d;
   diffSpan.textContent = p.d;
 
+  var questionBtn = document.createElement("button");
+  questionBtn.className = "question-btn" + (question ? " has-content" : "");
+  questionBtn.textContent = "question";
+
   var notesBtn = document.createElement("button");
   notesBtn.className = "notes-btn";
   notesBtn.textContent = "notes";
@@ -802,34 +835,69 @@ function buildProblemItem(p, si, pi) {
   item.appendChild(checkbox);
   item.appendChild(nameSpan);
   item.appendChild(diffSpan);
+  item.appendChild(questionBtn);
   item.appendChild(notesBtn);
 
   var noteId = si + "-" + pi;
+
+  var questionArea = document.createElement("textarea");
+  questionArea.className = "question-area" + (openQuestions[noteId] ? " visible" : "");
+  questionArea.placeholder = "Paste the problem statement here...";
+  questionArea.value = question;
+  questionArea.addEventListener("input", function() { autoResize(this); });
+  questionArea.addEventListener("blur", function() {
+    var qKey = getQuestionKey(si, pi);
+    if (this.value.trim()) {
+      state[qKey] = this.value.trim();
+    } else {
+      delete state[qKey];
+    }
+    saveState(state);
+  });
+
+  questionBtn.addEventListener("click", function() {
+    var wasVisible = openQuestions[noteId];
+    // close all open areas
+    document.querySelectorAll(".question-area.visible, .notes-area.visible").forEach(function(el) {
+      el.classList.remove("visible");
+    });
+    openNotes = {};
+    openQuestions = {};
+    if (!wasVisible) {
+      questionArea.classList.add("visible");
+      openQuestions[noteId] = true;
+      autoResize(questionArea);
+      questionArea.focus();
+    }
+  });
 
   var textarea = document.createElement("textarea");
   textarea.className = "notes-area" + (openNotes[noteId] ? " visible" : "");
   textarea.placeholder = "Add notes...";
   textarea.value = note;
+  textarea.addEventListener("input", function() { autoResize(this); });
   textarea.addEventListener("blur", function() {
     saveNote(si, pi, this.value);
   });
 
   notesBtn.addEventListener("click", function() {
     var wasVisible = openNotes[noteId];
-    // close all open notes
-    document.querySelectorAll(".notes-area.visible").forEach(function(el) {
+    // close all open areas
+    document.querySelectorAll(".notes-area.visible, .question-area.visible").forEach(function(el) {
       el.classList.remove("visible");
     });
     openNotes = {};
-    // toggle this one
+    openQuestions = {};
     if (!wasVisible) {
       textarea.classList.add("visible");
       openNotes[noteId] = true;
+      autoResize(textarea);
       textarea.focus();
     }
   });
 
   wrapper.appendChild(item);
+  wrapper.appendChild(questionArea);
   wrapper.appendChild(textarea);
   return wrapper;
 }
@@ -844,7 +912,7 @@ function render() {
   DATA.forEach(function(section, si) {
     var sectionDone = 0;
     section.problems.forEach(function(_, pi) {
-      if (state[getKey(si, pi)]) sectionDone++;
+      var k = getKey(si, pi); if (k in state ? state[k] : section.problems[pi].s) sectionDone++;
     });
     totalDone += sectionDone;
     totalAll += section.problems.length;
@@ -852,8 +920,8 @@ function render() {
     var filteredProblems = [];
     section.problems.forEach(function(p, pi) {
       var dominated = false;
-      if (currentFilter === "pending" && state[getKey(si, pi)]) dominated = true;
-      if (currentFilter === "completed" && !state[getKey(si, pi)]) dominated = true;
+      var fk = getKey(si, pi); var fChecked = fk in state ? !!state[fk] : !!p.s; if (currentFilter === "pending" && fChecked) dominated = true;
+      if (currentFilter === "completed" && !fChecked) dominated = true;
       if (currentFilter === "easy" && p.d !== "easy") dominated = true;
       if (currentFilter === "medium" && p.d !== "medium") dominated = true;
       if (currentFilter === "hard" && p.d !== "hard") dominated = true;

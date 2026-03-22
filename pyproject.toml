@@ -27,6 +27,9 @@ ignore = [
 quote-style = "double"
 indent-style = "space"
 
+[tool.pylint.messages_control]
+disable = ["C0200"]  # consider-using-enumerate — index access is intentional in DSA
+
 [tool.mypy]
 python_version = "3.9"
 warn_return_any = true
