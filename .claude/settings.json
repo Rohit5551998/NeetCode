@@ -1,0 +1,33 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_response.filePath // .tool_input.file_path' | { read -r f; echo \"$f\" | grep -q '\\.py$' && python3 -m ruff format \"$f\" && python3 -m ruff check --fix \"$f\"; } 2>/dev/null || true",
+            "timeout": 15,
+            "statusMessage": "Running ruff format + lint..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | { read -r f; echo \"$f\" | grep -q 'index\\.html$' && echo '{\"decision\":\"block\",\"reason\":\"Blocked: index.html is the tracker. Confirm with user before editing.\"}' || echo '{}'; }",
+            "timeout": 5,
+            "statusMessage": "Checking file..."
+          }
+        ]
+      }
+    ]
+  },
+  "attribution": {
+    "commit": ""
+  }
+}

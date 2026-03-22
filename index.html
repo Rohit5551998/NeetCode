@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeetCode 150 + System Design Tracker</title>
+<style>
+  :root {
+    --bg: #0f0f13;
+    --surface: #1a1a24;
+    --surface-hover: #22222f;
+    --border: #2a2a3a;
+    --text: #e4e4ed;
+    --text-dim: #8888a0;
+    --accent: #7c5cfc;
+    --accent-glow: rgba(124, 92, 252, 0.15);
+    --green: #34d399;
+    --green-dim: rgba(52, 211, 153, 0.15);
+    --orange: #fb923c;
+    --orange-dim: rgba(251, 146, 60, 0.15);
+    --red: #f87171;
+    --red-dim: rgba(248, 113, 113, 0.15);
+    --yellow: #fbbf24;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+
+  .header h1 span { color: var(--accent); }
+
+  .deadline {
+    font-size: 14px;
+    color: var(--text-dim);
+  }
+
+  .deadline strong {
+    color: var(--orange);
+    font-weight: 600;
+  }
+
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .stat-card .value {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .stat-card .label {
+    font-size: 12px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+  }
+
+  .stat-card.total .value { color: var(--accent); }
+  .stat-card.done .value { color: var(--green); }
+  .stat-card.remaining .value { color: var(--orange); }
+  .stat-card.pace .value { color: var(--yellow); font-size: 22px; }
+
+  .overall-progress {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 32px;
+  }
+
+  .overall-progress .top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+  }
+
+  .overall-progress .top-row h2 {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .overall-progress .percentage {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .progress-track {
+    width: 100%;
+    height: 10px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #a78bfa);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+
+  .weekly-schedule {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 32px;
+  }
+
+  .weekly-schedule h2 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  .week-row {
+    display: grid;
+    grid-template-columns: 60px 1fr 100px 60px;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .week-row:last-child { border-bottom: none; }
+
+  .week-row .wk {
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .week-row .dates { color: var(--text-dim); }
+  .week-row .sections { color: var(--text); }
+
+  .week-row .wk-status {
+    text-align: right;
+    font-weight: 600;
+    font-size: 12px;
+  }
+
+  .week-row.current {
+    background: var(--accent-glow);
+    border-radius: 8px;
+    padding: 8px;
+    margin: 0 -8px;
+  }
+
+  .wk-done { color: var(--green); }
+  .wk-active { color: var(--orange); }
+  .wk-pending { color: var(--text-dim); }
+
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+  }
+
+  .section-header:hover { background: var(--surface-hover); }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title .chevron {
+    font-size: 12px;
+    color: var(--text-dim);
+    transition: transform 0.2s;
+    display: inline-block;
+  }
+
+  .section.open .chevron { transform: rotate(90deg); }
+
+  .section-title h3 {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .section-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-count {
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .section-count .done-count { color: var(--green); font-weight: 600; }
+
+  .section-bar {
+    width: 80px;
+    height: 6px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .section-bar-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 999px;
+    transition: width 0.3s;
+  }
+
+  .problem-list {
+    display: none;
+    padding: 0 20px 16px;
+  }
+
+  .section.open .problem-list { display: block; }
+
+  .problem-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-top: 1px solid var(--border);
+    font-size: 14px;
+    transition: opacity 0.2s;
+  }
+
+  .problem-item.completed { opacity: 0.5; }
+  .problem-item.completed .problem-name { text-decoration: line-through; }
+
+  .problem-checkbox {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    background: transparent;
+  }
+
+  .problem-checkbox:checked {
+    background: var(--green);
+    border-color: var(--green);
+  }
+
+  .problem-checkbox:checked::after {
+    content: '\2713';
+    color: #000;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .problem-name { flex: 1; cursor: pointer; }
+
+  .problem-difficulty {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+
+  .diff-easy { background: var(--green-dim); color: var(--green); }
+  .diff-medium { background: var(--orange-dim); color: var(--orange); }
+  .diff-hard { background: var(--red-dim); color: var(--red); }
+
+  .notes-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .notes-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .notes-area {
+    display: none;
+    width: 100%;
+    margin-top: 8px;
+    margin-bottom: 4px;
+    padding: 8px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 220px;
+  }
+
+  .notes-area.visible { display: block; }
+
+  .reset-bar {
+    text-align: center;
+    margin-top: 40px;
+  }
+
+  .reset-btn {
+    padding: 8px 20px;
+    background: transparent;
+    border: 1px solid var(--red);
+    color: var(--red);
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .reset-btn:hover { background: var(--red-dim); }
+
+  @media (max-width: 600px) {
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+    .week-row { grid-template-columns: 50px 1fr 50px; }
+    .week-row .dates { display: none; }
+    .section-bar { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>NeetCode <span>150</span> + System Design</h1>
+    <div class="deadline">Deadline: <strong>June 30, 2026</strong> · Started: March 22, 2026</div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-card total"><div class="value" id="stat-total">172</div><div class="label">Total</div></div>
+    <div class="stat-card done"><div class="value" id="stat-done">0</div><div class="label">Done</div></div>
+    <div class="stat-card remaining"><div class="value" id="stat-remaining">172</div><div class="label">Remaining</div></div>
+    <div class="stat-card pace"><div class="value" id="stat-pace">-</div><div class="label">Needed / Day</div></div>
+  </div>
+
+  <div class="overall-progress">
+    <div class="top-row">
+      <h2>Overall Progress</h2>
+      <div class="percentage" id="overall-pct">0%</div>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="overall-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="weekly-schedule" id="weekly-schedule"></div>
+
+  <div class="filter-bar">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="pending">Pending</button>
+    <button class="filter-btn" data-filter="completed">Completed</button>
+    <button class="filter-btn" data-filter="easy">Easy</button>
+    <button class="filter-btn" data-filter="medium">Medium</button>
+    <button class="filter-btn" data-filter="hard">Hard</button>
+  </div>
+
+  <div id="sections-container"></div>
+
+  <div class="reset-bar">
+    <button class="reset-btn" id="reset-btn">Reset All Progress</button>
+  </div>
+</div>
+
+<script>
+const DATA = [
+  {
+    name: "Arrays & Hashing", week: 1, problems: [
+      { name: "Contains Duplicate", d: "easy" },
+      { name: "Valid Anagram", d: "easy" },
+      { name: "Two Sum", d: "easy" },
+      { name: "Group Anagrams", d: "medium" },
+      { name: "Top K Frequent Elements", d: "medium" },
+      { name: "Encode and Decode Strings", d: "medium" },
+      { name: "Product of Array Except Self", d: "medium" },
+      { name: "Valid Sudoku", d: "medium" },
+      { name: "Longest Consecutive Sequence", d: "medium" }
+    ]
+  },
+  {
+    name: "Two Pointers", week: 2, problems: [
+      { name: "Valid Palindrome", d: "easy" },
+      { name: "Two Sum II", d: "medium" },
+      { name: "3Sum", d: "medium" },
+      { name: "Container With Most Water", d: "medium" },
+      { name: "Trapping Rain Water", d: "hard" }
+    ]
+  },
+  {
+    name: "Sliding Window", week: 2, problems: [
+      { name: "Best Time to Buy and Sell Stock", d: "easy" },
+      { name: "Longest Substring Without Repeating Characters", d: "medium" },
+      { name: "Longest Repeating Character Replacement", d: "medium" },
+      { name: "Permutation in String", d: "medium" },
+      { name: "Minimum Window Substring", d: "hard" },
+      { name: "Sliding Window Maximum", d: "hard" }
+    ]
+  },
+  {
+    name: "Stack", week: 3, problems: [
+      { name: "Valid Parentheses", d: "easy" },
+      { name: "Min Stack", d: "medium" },
+      { name: "Evaluate Reverse Polish Notation", d: "medium" },
+      { name: "Generate Parentheses", d: "medium" },
+      { name: "Daily Temperatures", d: "medium" },
+      { name: "Car Fleet", d: "medium" },
+      { name: "Largest Rectangle in Histogram", d: "hard" }
+    ]
+  },
+  {
+    name: "Binary Search", week: 4, problems: [
+      { name: "Binary Search", d: "easy" },
+      { name: "Search a 2D Matrix", d: "medium" },
+      { name: "Koko Eating Bananas", d: "medium" },
+      { name: "Find Minimum in Rotated Sorted Array", d: "medium" },
+      { name: "Search in Rotated Sorted Array", d: "medium" },
+      { name: "Time Based Key-Value Store", d: "medium" },
+      { name: "Median of Two Sorted Arrays", d: "hard" }
+    ]
+  },
+  {
+    name: "Linked List", week: 5, problems: [
+      { name: "Reverse Linked List", d: "easy" },
+      { name: "Merge Two Sorted Lists", d: "easy" },
+      { name: "Reorder List", d: "medium" },
+      { name: "Remove Nth Node From End of List", d: "medium" },
+      { name: "Copy List With Random Pointer", d: "medium" },
+      { name: "Add Two Numbers", d: "medium" },
+      { name: "Linked List Cycle", d: "easy" },
+      { name: "Find the Duplicate Number", d: "medium" },
+      { name: "LRU Cache", d: "medium" },
+      { name: "Merge K Sorted Lists", d: "hard" },
+      { name: "Reverse Nodes in K-Group", d: "hard" }
+    ]
+  },
+  {
+    name: "Trees", week: 6, problems: [
+      { name: "Invert Binary Tree", d: "easy" },
+      { name: "Maximum Depth of Binary Tree", d: "easy" },
+      { name: "Diameter of Binary Tree", d: "easy" },
+      { name: "Balanced Binary Tree", d: "easy" },
+      { name: "Same Tree", d: "easy" },
+      { name: "Subtree of Another Tree", d: "easy" },
+      { name: "Lowest Common Ancestor of BST", d: "medium" },
+      { name: "Binary Tree Level Order Traversal", d: "medium" },
+      { name: "Binary Tree Right Side View", d: "medium" },
+      { name: "Count Good Nodes in Binary Tree", d: "medium" },
+      { name: "Validate Binary Search Tree", d: "medium" },
+      { name: "Kth Smallest Element in a BST", d: "medium" },
+      { name: "Construct Binary Tree from Preorder and Inorder Traversal", d: "medium" },
+      { name: "Binary Tree Maximum Path Sum", d: "hard" },
+      { name: "Serialize and Deserialize Binary Tree", d: "hard" }
+    ]
+  },
+  {
+    name: "Tries", week: 7, problems: [
+      { name: "Implement Trie (Prefix Tree)", d: "medium" },
+      { name: "Design Add and Search Words Data Structure", d: "medium" },
+      { name: "Word Search II", d: "hard" }
+    ]
+  },
+  {
+    name: "Heap / Priority Queue", week: 7, problems: [
+      { name: "Kth Largest Element in a Stream", d: "easy" },
+      { name: "Last Stone Weight", d: "easy" },
+      { name: "K Closest Points to Origin", d: "medium" },
+      { name: "Kth Largest Element in an Array", d: "medium" },
+      { name: "Task Scheduler", d: "medium" },
+      { name: "Design Twitter", d: "medium" },
+      { name: "Find Median from Data Stream", d: "hard" }
+    ]
+  },
+  {
+    name: "Backtracking", week: 8, problems: [
+      { name: "Subsets", d: "medium" },
+      { name: "Combination Sum", d: "medium" },
+      { name: "Permutations", d: "medium" },
+      { name: "Subsets II", d: "medium" },
+      { name: "Combination Sum II", d: "medium" },
+      { name: "Word Search", d: "medium" },
+      { name: "Palindrome Partitioning", d: "medium" },
+      { name: "Letter Combinations of a Phone Number", d: "medium" },
+      { name: "N-Queens", d: "hard" }
+    ]
+  },
+  {
+    name: "Graphs", week: 9, problems: [
+      { name: "Number of Islands", d: "medium" },
+      { name: "Max Area of Island", d: "medium" },
+      { name: "Clone Graph", d: "medium" },
+      { name: "Walls and Gates", d: "medium" },
+      { name: "Rotting Oranges", d: "medium" },
+      { name: "Pacific Atlantic Water Flow", d: "medium" },
+      { name: "Surrounded Regions", d: "medium" },
+      { name: "Course Schedule", d: "medium" },
+      { name: "Course Schedule II", d: "medium" },
+      { name: "Graph Valid Tree", d: "medium" },
+      { name: "Number of Connected Components in an Undirected Graph", d: "medium" },
+      { name: "Redundant Connection", d: "medium" },
+      { name: "Word Ladder", d: "hard" }
+    ]
+  },
+  {
+    name: "Advanced Graphs", week: 10, problems: [
+      { name: "Reconstruct Itinerary", d: "hard" },
+      { name: "Min Cost to Connect All Points", d: "medium" },
+      { name: "Network Delay Time", d: "medium" },
+      { name: "Swim in Rising Water", d: "hard" },
+      { name: "Alien Dictionary", d: "hard" },
+      { name: "Cheapest Flights Within K Stops", d: "medium" }
+    ]
+  },
+  {
+    name: "1D Dynamic Programming", week: 11, problems: [
+      { name: "Climbing Stairs", d: "easy" },
+      { name: "Min Cost Climbing Stairs", d: "easy" },
+      { name: "House Robber", d: "medium" },
+      { name: "House Robber II", d: "medium" },
+      { name: "Longest Palindromic Substring", d: "medium" },
+      { name: "Palindromic Substrings", d: "medium" },
+      { name: "Decode Ways", d: "medium" },
+      { name: "Coin Change", d: "medium" },
+      { name: "Maximum Product Subarray", d: "medium" },
+      { name: "Word Break", d: "medium" },
+      { name: "Longest Increasing Subsequence", d: "medium" },
+      { name: "Partition Equal Subset Sum", d: "medium" }
+    ]
+  },
+  {
+    name: "2D Dynamic Programming", week: 12, problems: [
+      { name: "Unique Paths", d: "medium" },
+      { name: "Longest Common Subsequence", d: "medium" },
+      { name: "Best Time to Buy and Sell Stock with Cooldown", d: "medium" },
+      { name: "Coin Change II", d: "medium" },
+      { name: "Target Sum", d: "medium" },
+      { name: "Interleaving String", d: "medium" },
+      { name: "Longest Increasing Path in a Matrix", d: "hard" },
+      { name: "Distinct Subsequences", d: "hard" },
+      { name: "Edit Distance", d: "medium" },
+      { name: "Burst Balloons", d: "hard" },
+      { name: "Regular Expression Matching", d: "hard" }
+    ]
+  },
+  {
+    name: "Greedy", week: 13, problems: [
+      { name: "Maximum Subarray", d: "medium" },
+      { name: "Jump Game", d: "medium" },
+      { name: "Jump Game II", d: "medium" },
+      { name: "Gas Station", d: "medium" },
+      { name: "Hand of Straights", d: "medium" },
+      { name: "Merge Triplets to Form Target Triplet", d: "medium" },
+      { name: "Partition Labels", d: "medium" },
+      { name: "Valid Parenthesis String", d: "medium" }
+    ]
+  },
+  {
+    name: "Intervals", week: 13, problems: [
+      { name: "Insert Interval", d: "medium" },
+      { name: "Merge Intervals", d: "medium" },
+      { name: "Non-Overlapping Intervals", d: "medium" },
+      { name: "Meeting Rooms", d: "easy" },
+      { name: "Meeting Rooms II", d: "medium" },
+      { name: "Minimum Interval to Include Each Query", d: "hard" }
+    ]
+  },
+  {
+    name: "Math & Geometry", week: 14, problems: [
+      { name: "Rotate Image", d: "medium" },
+      { name: "Spiral Matrix", d: "medium" },
+      { name: "Set Matrix Zeroes", d: "medium" },
+      { name: "Happy Number", d: "easy" },
+      { name: "Plus One", d: "easy" },
+      { name: "Pow(x, n)", d: "medium" },
+      { name: "Multiply Strings", d: "medium" },
+      { name: "Detect Squares", d: "medium" }
+    ]
+  },
+  {
+    name: "Bit Manipulation", week: 14, problems: [
+      { name: "Single Number", d: "easy" },
+      { name: "Number of 1 Bits", d: "easy" },
+      { name: "Counting Bits", d: "easy" },
+      { name: "Reverse Bits", d: "easy" },
+      { name: "Missing Number", d: "easy" },
+      { name: "Sum of Two Integers", d: "medium" },
+      { name: "Reverse Integer", d: "medium" }
+    ]
+  },
+  {
+    name: "System Design - Fundamentals", week: 3, problems: [
+      { name: "Client-Server Model", d: "medium" },
+      { name: "Network Protocols (TCP/UDP/HTTP)", d: "medium" },
+      { name: "Storage & Databases (SQL vs NoSQL)", d: "medium" },
+      { name: "Latency & Throughput", d: "medium" },
+      { name: "Availability & Redundancy", d: "medium" },
+      { name: "Caching", d: "medium" },
+      { name: "Proxies & Load Balancers", d: "medium" },
+      { name: "Hashing & Consistent Hashing", d: "medium" }
+    ]
+  },
+  {
+    name: "System Design - Databases", week: 4, problems: [
+      { name: "SQL vs NoSQL Deep Dive", d: "medium" },
+      { name: "Replication & Sharding", d: "medium" },
+      { name: "CAP Theorem", d: "medium" },
+      { name: "ACID Transactions", d: "medium" }
+    ]
+  },
+  {
+    name: "System Design - Distributed Systems", week: 8, problems: [
+      { name: "Leader Election", d: "hard" },
+      { name: "Peer-to-Peer Networks", d: "hard" },
+      { name: "Rate Limiting", d: "medium" },
+      { name: "Message Queues & Pub/Sub", d: "medium" },
+      { name: "MapReduce", d: "hard" }
+    ]
+  },
+  {
+    name: "System Design - Design Problems", week: 10, problems: [
+      { name: "Design a URL Shortener", d: "medium" },
+      { name: "Design Instagram/Twitter Feed", d: "hard" },
+      { name: "Design a Chat System", d: "hard" },
+      { name: "Design YouTube/Netflix", d: "hard" },
+      { name: "Design a Web Crawler", d: "hard" }
+    ]
+  }
+];
+
+const WEEKS = [
+  { wk: 1, dates: "Mar 23 - Mar 29", sections: "Arrays & Hashing" },
+  { wk: 2, dates: "Mar 30 - Apr 5", sections: "Two Pointers, Sliding Window" },
+  { wk: 3, dates: "Apr 6 - Apr 12", sections: "Stack, SD Fundamentals" },
+  { wk: 4, dates: "Apr 13 - Apr 19", sections: "Binary Search, SD Databases" },
+  { wk: 5, dates: "Apr 20 - Apr 26", sections: "Linked List" },
+  { wk: 6, dates: "Apr 27 - May 3", sections: "Trees" },
+  { wk: 7, dates: "May 4 - May 10", sections: "Tries, Heap / Priority Queue" },
+  { wk: 8, dates: "May 11 - May 17", sections: "Backtracking, SD Distributed" },
+  { wk: 9, dates: "May 18 - May 24", sections: "Graphs" },
+  { wk: 10, dates: "May 25 - May 31", sections: "Advanced Graphs, SD Design Problems" },
+  { wk: 11, dates: "Jun 1 - Jun 7", sections: "1D Dynamic Programming" },
+  { wk: 12, dates: "Jun 8 - Jun 14", sections: "2D Dynamic Programming" },
+  { wk: 13, dates: "Jun 15 - Jun 21", sections: "Greedy, Intervals" },
+  { wk: 14, dates: "Jun 22 - Jun 30", sections: "Math & Geometry, Bit Manipulation" }
+];
+
+const STORAGE_KEY = "neetcode-tracker-v1";
+
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch(e) { return {}; }
+}
+
+function saveState(st) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(st));
+}
+
+function getKey(si, pi) { return si + "-" + pi; }
+function getNoteKey(si, pi) { return "n-" + si + "-" + pi; }
+
+function getCurrentWeek() {
+  var start = new Date(2026, 2, 23);
+  var now = new Date();
+  var diff = Math.floor((now - start) / (7 * 24 * 60 * 60 * 1000));
+  return Math.max(1, Math.min(14, diff + 1));
+}
+
+function getDaysRemaining() {
+  var deadline = new Date(2026, 5, 30);
+  var now = new Date();
+  return Math.max(0, Math.ceil((deadline - now) / (1000 * 60 * 60 * 24)));
+}
+
+var state = loadState();
+var currentFilter = "all";
+var openSections = {};
+var openNotes = {};
+
+function escapeHtml(text) {
+  var div = document.createElement("div");
+  div.appendChild(document.createTextNode(text));
+  return div.textContent;
+}
+
+function buildProblemItem(p, si, pi) {
+  var key = getKey(si, pi);
+  var noteKey = getNoteKey(si, pi);
+  var isChecked = !!state[key];
+  var note = state[noteKey] || "";
+
+  var wrapper = document.createDocumentFragment();
+
+  var item = document.createElement("div");
+  item.className = "problem-item" + (isChecked ? " completed" : "");
+
+  var checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.className = "problem-checkbox";
+  checkbox.checked = isChecked;
+  checkbox.addEventListener("change", function() {
+    toggleProblem(si, pi, this.checked);
+  });
+
+  var nameSpan = document.createElement("span");
+  nameSpan.className = "problem-name";
+  nameSpan.textContent = p.name;
+  nameSpan.addEventListener("click", function() { checkbox.click(); });
+
+  var diffSpan = document.createElement("span");
+  diffSpan.className = "problem-difficulty diff-" + p.d;
+  diffSpan.textContent = p.d;
+
+  var notesBtn = document.createElement("button");
+  notesBtn.className = "notes-btn";
+  notesBtn.textContent = "notes";
+
+  item.appendChild(checkbox);
+  item.appendChild(nameSpan);
+  item.appendChild(diffSpan);
+  item.appendChild(notesBtn);
+
+  var noteId = si + "-" + pi;
+
+  var textarea = document.createElement("textarea");
+  textarea.className = "notes-area" + (openNotes[noteId] ? " visible" : "");
+  textarea.placeholder = "Add notes...";
+  textarea.value = note;
+  textarea.addEventListener("blur", function() {
+    saveNote(si, pi, this.value);
+  });
+
+  notesBtn.addEventListener("click", function() {
+    var wasVisible = openNotes[noteId];
+    // close all open notes
+    document.querySelectorAll(".notes-area.visible").forEach(function(el) {
+      el.classList.remove("visible");
+    });
+    openNotes = {};
+    // toggle this one
+    if (!wasVisible) {
+      textarea.classList.add("visible");
+      openNotes[noteId] = true;
+      textarea.focus();
+    }
+  });
+
+  wrapper.appendChild(item);
+  wrapper.appendChild(textarea);
+  return wrapper;
+}
+
+function render() {
+  var container = document.getElementById("sections-container");
+  container.textContent = "";
+
+  var totalDone = 0;
+  var totalAll = 0;
+
+  DATA.forEach(function(section, si) {
+    var sectionDone = 0;
+    section.problems.forEach(function(_, pi) {
+      if (state[getKey(si, pi)]) sectionDone++;
+    });
+    totalDone += sectionDone;
+    totalAll += section.problems.length;
+
+    var filteredProblems = [];
+    section.problems.forEach(function(p, pi) {
+      var dominated = false;
+      if (currentFilter === "pending" && state[getKey(si, pi)]) dominated = true;
+      if (currentFilter === "completed" && !state[getKey(si, pi)]) dominated = true;
+      if (currentFilter === "easy" && p.d !== "easy") dominated = true;
+      if (currentFilter === "medium" && p.d !== "medium") dominated = true;
+      if (currentFilter === "hard" && p.d !== "hard") dominated = true;
+      if (!dominated) filteredProblems.push({ p: p, pi: pi });
+    });
+
+    if (filteredProblems.length === 0 && currentFilter !== "all") return;
+
+    var pct = section.problems.length > 0 ? (sectionDone / section.problems.length * 100) : 0;
+    var isComplete = sectionDone === section.problems.length;
+
+    var div = document.createElement("div");
+    div.className = "section" + (openSections[si] ? " open" : "");
+
+    var header = document.createElement("div");
+    header.className = "section-header";
+    (function(idx) {
+      header.addEventListener("click", function() {
+        openSections[idx] = !openSections[idx];
+        div.classList.toggle("open");
+      });
+    })(si);
+
+    var titleDiv = document.createElement("div");
+    titleDiv.className = "section-title";
+
+    var chevron = document.createElement("span");
+    chevron.className = "chevron";
+    chevron.textContent = "\u25B6";
+
+    var h3 = document.createElement("h3");
+    h3.textContent = (isComplete ? "\u2713 " : "") + section.name;
+
+    titleDiv.appendChild(chevron);
+    titleDiv.appendChild(h3);
+
+    var metaDiv = document.createElement("div");
+    metaDiv.className = "section-meta";
+
+    var countSpan = document.createElement("span");
+    countSpan.className = "section-count";
+    var doneSpan = document.createElement("span");
+    doneSpan.className = "done-count";
+    doneSpan.textContent = sectionDone;
+    countSpan.appendChild(doneSpan);
+    countSpan.appendChild(document.createTextNode(" / " + section.problems.length));
+
+    var barDiv = document.createElement("div");
+    barDiv.className = "section-bar";
+    var barFill = document.createElement("div");
+    barFill.className = "section-bar-fill";
+    barFill.style.width = pct + "%";
+    barDiv.appendChild(barFill);
+
+    metaDiv.appendChild(countSpan);
+    metaDiv.appendChild(barDiv);
+
+    header.appendChild(titleDiv);
+    header.appendChild(metaDiv);
+
+    var listDiv = document.createElement("div");
+    listDiv.className = "problem-list";
+
+    filteredProblems.forEach(function(item) {
+      listDiv.appendChild(buildProblemItem(item.p, si, item.pi));
+    });
+
+    div.appendChild(header);
+    div.appendChild(listDiv);
+    container.appendChild(div);
+  });
+
+  var remaining = totalAll - totalDone;
+  var daysLeft = getDaysRemaining();
+  var pace = daysLeft > 0 ? (remaining / daysLeft).toFixed(1) : "0";
+
+  document.getElementById("stat-total").textContent = totalAll;
+  document.getElementById("stat-done").textContent = totalDone;
+  document.getElementById("stat-remaining").textContent = remaining;
+  document.getElementById("stat-pace").textContent = remaining === 0 ? "Done!" : pace + "/day";
+
+  var pctAll = totalAll > 0 ? (totalDone / totalAll * 100) : 0;
+  document.getElementById("overall-pct").textContent = Math.round(pctAll) + "%";
+  document.getElementById("overall-fill").style.width = pctAll + "%";
+
+  renderWeekly();
+}
+
+function renderWeekly() {
+  var container = document.getElementById("weekly-schedule");
+  container.textContent = "";
+
+  var heading = document.createElement("h2");
+  heading.textContent = "Weekly Plan";
+  container.appendChild(heading);
+
+  var currentWk = getCurrentWeek();
+
+  var weekProblems = {};
+  DATA.forEach(function(section, si) {
+    var wk = section.week;
+    if (!weekProblems[wk]) weekProblems[wk] = { total: 0, done: 0 };
+    weekProblems[wk].total += section.problems.length;
+    section.problems.forEach(function(_, pi) {
+      if (state[getKey(si, pi)]) weekProblems[wk].done++;
+    });
+  });
+
+  WEEKS.forEach(function(w) {
+    var wp = weekProblems[w.wk] || { total: 0, done: 0 };
+    var isDone = wp.done === wp.total && wp.total > 0;
+
+    var row = document.createElement("div");
+    row.className = "week-row" + (w.wk === currentWk ? " current" : "");
+
+    var wkSpan = document.createElement("span");
+    wkSpan.className = "wk";
+    wkSpan.textContent = "W" + w.wk;
+
+    var secSpan = document.createElement("span");
+    secSpan.className = "sections";
+    secSpan.textContent = w.sections;
+
+    var dateSpan = document.createElement("span");
+    dateSpan.className = "dates";
+    dateSpan.textContent = w.dates;
+
+    var statusSpan = document.createElement("span");
+    statusSpan.className = "wk-status";
+    if (isDone) {
+      statusSpan.classList.add("wk-done");
+      statusSpan.textContent = "Done";
+    } else if (w.wk <= currentWk) {
+      statusSpan.classList.add("wk-active");
+      statusSpan.textContent = wp.done + "/" + wp.total;
+    } else {
+      statusSpan.classList.add("wk-pending");
+      statusSpan.textContent = wp.total + " items";
+    }
+
+    row.appendChild(wkSpan);
+    row.appendChild(secSpan);
+    row.appendChild(dateSpan);
+    row.appendChild(statusSpan);
+    container.appendChild(row);
+  });
+}
+
+var NOTE_TEMPLATE =
+  "BRUTE FORCE:\n" +
+  "- Approach: \n" +
+  "- Time: O()\n" +
+  "- Space: O()\n" +
+  "\n" +
+  "BETTER:\n" +
+  "- Approach: \n" +
+  "- Time: O()\n" +
+  "- Space: O()\n" +
+  "\n" +
+  "OPTIMAL:\n" +
+  "- Approach: \n" +
+  "- Time: O()\n" +
+  "- Space: O()\n" +
+  "\n" +
+  "KEY INSIGHT:\n" +
+  "- ";
+
+function toggleProblem(si, pi, checked) {
+  var key = getKey(si, pi);
+  var noteKey = getNoteKey(si, pi);
+  if (checked) {
+    state[key] = true;
+    if (!state[noteKey]) {
+      state[noteKey] = NOTE_TEMPLATE;
+    }
+  } else {
+    delete state[key];
+  }
+  saveState(state);
+  render();
+}
+
+function saveNote(si, pi, value) {
+  var key = getNoteKey(si, pi);
+  if (value.trim()) {
+    state[key] = value.trim();
+  } else {
+    delete state[key];
+  }
+  saveState(state);
+}
+
+document.getElementById("reset-btn").addEventListener("click", function() {
+  if (confirm("Reset all progress? Notes will be preserved.")) {
+    var preserved = {};
+    Object.keys(state).forEach(function(k) {
+      if (k.indexOf("n-") === 0) preserved[k] = state[k];
+    });
+    state = preserved;
+    saveState(state);
+    openSections = {};
+    render();
+  }
+});
+
+document.querySelectorAll(".filter-btn").forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    document.querySelectorAll(".filter-btn").forEach(function(b) {
+      b.classList.remove("active");
+    });
+    btn.classList.add("active");
+    currentFilter = btn.dataset.filter;
+    render();
+  });
+});
+
+render();
+</script>
+</body>
+</html>
