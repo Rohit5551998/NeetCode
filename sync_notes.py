@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Sync docstrings from .py solution files into index.html DATA entries."""
+"""Sync docstrings and questions from .py solution files into index.html DATA entries."""
 
 from __future__ import annotations
 
@@ -82,10 +82,29 @@ def is_fully_solved(py_file: Path) -> bool:
     return True
 
 
-def collect_solutions() -> tuple[dict[str, str], set[str]]:
-    """Collect docstrings and solved status from .py files."""
+def extract_question(py_file: Path) -> str | None:
+    """Extract the # QUESTION: comment block from the top of a .py file."""
+    lines = py_file.read_text().splitlines()
+    question_lines: list[str] = []
+    started = False
+    for line in lines:
+        if line.startswith("# QUESTION:"):
+            started = True
+            question_lines.append(line.removeprefix("# QUESTION:").strip())
+        elif started and line.startswith("#"):
+            question_lines.append(line.removeprefix("#").removeprefix(" "))
+        elif started:
+            break
+    if not question_lines:
+        return None
+    return "\n".join(question_lines).strip()
+
+
+def collect_solutions() -> tuple[dict[str, str], set[str], dict[str, str]]:
+    """Collect docstrings, solved status, and questions from .py files."""
     notes: dict[str, str] = {}
     solved: set[str] = set()
+    questions: dict[str, str] = {}
     for py_file in ROOT.glob("*/*.py"):
         key = filename_to_key(py_file.name)
         docstring = extract_docstring(py_file)
@@ -93,13 +112,16 @@ def collect_solutions() -> tuple[dict[str, str], set[str]]:
             notes[key] = docstring
         if is_fully_solved(py_file):
             solved.add(key)
-    return notes, solved
+        question = extract_question(py_file)
+        if question:
+            questions[key] = question
+    return notes, solved, questions
 
 
 def sync() -> int:
     """Sync docstrings and solved status into index.html. Returns count of updated entries."""
-    notes, solved = collect_solutions()
-    if not notes and not solved:
+    notes, solved, questions = collect_solutions()
+    if not notes and not solved and not questions:
         return 0
 
     index_path = ROOT / "index.html"
@@ -115,14 +137,17 @@ def sync() -> int:
         suffix = match.group(3)
         key = problem_name_to_key(name)
 
-        if key not in notes and key not in solved:
+        if key not in notes and key not in solved and key not in questions:
             return match.group(0)
 
-        # Remove existing n and s fields if present
-        rest_clean = re.sub(r',\s*n:\s*"(?:[^"\\]|\\.)*"', "", rest)
+        # Remove existing q, n and s fields if present
+        rest_clean = re.sub(r',\s*q:\s*"(?:[^"\\]|\\.)*"', "", rest)
+        rest_clean = re.sub(r',\s*n:\s*"(?:[^"\\]|\\.)*"', "", rest_clean)
         rest_clean = re.sub(r",\s*s:\s*true", "", rest_clean)
 
         extras = ""
+        if key in questions:
+            extras += ', q: "' + escape_for_js(questions[key]) + '"'
         if key in notes:
             extras += ', n: "' + escape_for_js(notes[key]) + '"'
         if key in solved:
