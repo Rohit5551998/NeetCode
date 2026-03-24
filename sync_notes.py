@@ -47,8 +47,40 @@ def escape_for_js(text: str) -> str:
     return text
 
 
+def _has_skip_comment(py_file: Path, func_name: str) -> bool:
+    """Check if a function has a # SKIP comment in its source."""
+    for line in py_file.read_text().splitlines():
+        stripped = line.strip()
+        if stripped.startswith(f"def {func_name}("):
+            # Found the function, now check subsequent lines for # SKIP
+            in_func = True
+            continue
+    # Re-scan looking inside the function body
+    in_func = False
+    for line in py_file.read_text().splitlines():
+        stripped = line.strip()
+        if stripped.startswith(f"def {func_name}("):
+            in_func = True
+            continue
+        if in_func:
+            if stripped.startswith("def ") or (
+                stripped
+                and not stripped.startswith("#")
+                and not stripped.startswith("pass")
+                and not stripped == ""
+            ):
+                break
+            if stripped.upper().startswith("# SKIP"):
+                return True
+    return False
+
+
 def is_fully_solved(py_file: Path) -> bool:
-    """Check if all 3 approaches (_brute, _better, _optimal) are implemented."""
+    """Check if all 3 approaches (_brute, _better, _optimal) are implemented.
+
+    A function counts as done if it has real code, or has a '# SKIP: <reason>'
+    comment. The _optimal function is always required to have real code.
+    """
     source = py_file.read_text()
     try:
         tree = ast.parse(source)
@@ -63,8 +95,7 @@ def is_fully_solved(py_file: Path) -> bool:
                     found[s] = node
     if len(found) != 3:
         return False
-    # Check none of them are just `pass`
-    for node in found.values():
+    for suffix, node in found.items():
         body = node.body
         # Skip docstring if present
         stmts = (
@@ -78,7 +109,12 @@ def is_fully_solved(py_file: Path) -> bool:
             else body
         )
         if len(stmts) == 1 and isinstance(stmts[0], ast.Pass):
-            return False
+            # _optimal is always required
+            if suffix == "_optimal":
+                return False
+            # Allow skip if # SKIP comment is present
+            if not _has_skip_comment(py_file, node.name):
+                return False
     return True
 
 
